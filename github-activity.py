@@ -20,7 +20,7 @@ def fetch_user_data(username):
             
             return list_user_data
               
-    except urllib.erorr.HTTPError as e:
+    except urllib.error.HTTPError as e:
         # GitHub responded, but with an error code
         if e.code == 404:
             print(f"Error: The username '{username}' typed doesn't exist on GitHub.")
@@ -84,12 +84,44 @@ def display_github_activity(username):
                 if action == "started":
                     print(f"- Starred {repo_name}")
                     
+              
+            # If user opened a bug report or feature request        
+            if event_type == "IssuesEvent":
+                payload = event.get("paylaod", {})
+                action = payload.get("action")
+                
+                if action == "opened":
+                    print(f"- Opened a pull request in {repo_name}")
+                elif action == "closed":
+                    print(f"- Cloased a pull request in {repo_name}")
+                elif action == "reopened":
+                    print(f"- Reopened a pull request in {repo_name}")
+                    
+            
+            # If user submitted code changes to be reviewed                    
+            if event_type == "PullRequestEvent":
+                payload = event.get("payload", {})
+                action = payload.get("action")
+                
+                if action == "opened":
+                    print(f"- Opened a pull request in {repo_name}")
+                elif action == "closed":
+                    print(f"- Merged {repo_name}")
+                    
+            
+            
+            # If user made a new branch or release tag
+            if event_type == "CreateEvent":
+                payload = event.get("payload", {})
+                ref_type = payload.get("ref_type")
+                
+                if ref_type == "branch":
+                    print(f"- Created a new branch in {repo_name}")
+                elif ref_type == "tag":
+                    print(f"- Tagged a branch in {repo_name}")
                             
             
         
-    
-    
-    
 if __name__ == "__main__":
     
     # If user didn't type github user's name then warn about it
