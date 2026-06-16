@@ -33,7 +33,7 @@ def fetch_user_data(username):
         # If something is wrong with the internet
         print(f"Error: {e.reason}")
     
-    except json.JSONDEcodeError as e:
+    except json.JSONDecodeError as e:
         # The data fetched might be incompatible for json.loads()
         print("Error: Reaceived broken data form GitHub. Please try again.")
         
@@ -46,79 +46,65 @@ def fetch_user_data(username):
 
 def display_github_activity(username):
     events_list = fetch_user_data(username)
+    # This list is used to store already proccesed PushEvent repos
+    push_totals = {}
     
     if events_list:
         # Loop through all dictionary elements in list
         for event in events_list:
-            # Get the type of event type
             event_type = event.get("type")
-            
-            # Get the name of the repository in this type
             repo_name = event.get("repo", {}).get("name")
-            
-            # If the event is PushEvent then print the count of comits to the screen
+    
+            # --- 1. COLLECT PUSH EVENTS SILENTLY ---
             if event_type == "PushEvent":
                 payload = event.get("payload", {})
-                
-                # Look up to "size" key to get the count of commits
-                count_of_commits = payload.get("size")
-                
-                # We check whether there was size key or not if there wasn't then we manually
-                # count all commits from commits key 
-                if count_of_commits is None:
-                    count_of_commits = len(payload.get("commits", []))
-                    
-                # If still there was nothing then commits count is 1 because there was initially a PushEvent type, 
-                # meaning the user published the code some time ago 
-                if count_of_commits == 0:
-                    count_of_commits = 1
-                    
-                print(f"- Pushed {count_of_commits} commit(s) to {repo_name}")
-                
-                
-            # If the event type is WatchEvent then show the starred project
-            if event_type == "WatchEvent":
-                payload = event.get("payload", {})
-                action = payload.get("action")
-                
-                if action == "started":
-                    print(f"- Starred {repo_name}")
-                    
-              
-            # If user opened a bug report or feature request        
-            if event_type == "IssuesEvent":
-                payload = event.get("paylaod", {})
-                action = payload.get("action")
-                
-                if action == "opened":
-                    print(f"- Opened a pull request in {repo_name}")
-                elif action == "closed":
-                    print(f"- Cloased a pull request in {repo_name}")
-                elif action == "reopened":
-                    print(f"- Reopened a pull request in {repo_name}")
-                    
+        
+                # Calculate individual commits safely right now
+                commits = payload.get("size")
+                if commits is None:
+                    commits = len(payload.get("commits", []))
+                if commits == 0:
+                    commits = 1
             
-            # If user submitted code changes to be reviewed                    
-            if event_type == "PullRequestEvent":
-                payload = event.get("payload", {})
-                action = payload.get("action")
+                # Add to the dictionary total for this specific repo
+                push_totals[repo_name] = push_totals.get(repo_name, 0) + commits
+
+            # --- 2. DISPLAY OTHER EVENTS IMMEDIATELY ---
+            elif event_type == "WatchEvent":
+                print(f"- Starred {repo_name}")
+        
+            elif event_type == "IssuesEvent":
+                action = event.get("payload", {}).get("action", "interacted with")
+                print(f"- {action.capitalize()} an issue in {repo_name}")
                 
-                if action == "opened":
-                    print(f"- Opened a pull request in {repo_name}")
-                elif action == "closed":
-                    print(f"- Merged {repo_name}")
+            elif event_type == "CreateEvent":
+                payload = event.get("payload", {})
+                ref_type = payload.get("ref_type", {}) # 'repository', 'branch', or 'tag'
+                ref_name = payload.get("ref") # Name of the branch/tag (None if it's a repo)
+                
+                if ref_type == "repository":
+                    print(f"- Created a brand new repository: {repo_name}")
+                else:
+                    print(f"- Created a new {ref_type} ({ref_name}) in {repo_name}")
                     
-            
-            
-            # If user made a new branch or release tag
-            if event_type == "CreateEvent":
-                payload = event.get("payload", {})
-                ref_type = payload.get("ref_type")
+            elif event_type == "PullRequestEvent":
+                payload = event.get("payload")
+                action = payload.get("action") # 'opened', 'closed', 'reopened'
                 
-                if ref_type == "branch":
-                    print(f"- Created a new branch in {repo_name}")
-                elif ref_type == "tag":
-                    print(f"- Tagged a branch in {repo_name}")
+                # Capitalize makes 'opened' look like 'Opened' to put it in the beginning of the
+                # sentence
+                print(f"- {action.capitalize()} a pull request in {repo_name}")
+                
+            else:
+                # Formats 'ForkEvent' into 'Fork Event' smoothly
+                clean_event_name = event_type.replace("Event", " Event")
+                print(f"- Performed a {clean_event_name} on {repo_name}")
+                
+                
+
+        # --- 3. PRINT ALL SUMMED PUSHES AT THE VERY END ---
+        for repo, total_commits in push_totals.items():
+            print(f"- Pushed {total_commits} commit(s) to {repo}")
                             
             
         
@@ -127,6 +113,7 @@ if __name__ == "__main__":
     # If user didn't type github user's name then warn about it
     if len(sys.argv) < 2:
         print("User's name hasn't been typed, the right usage: github-activity <github_username>")
+        sys.exit(1) # Stop to prevent code from running anyway
         
     # Put user's name (sys.argv[1]) into the function to see results
     username = sys.argv[1]
