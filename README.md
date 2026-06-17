@@ -13,7 +13,6 @@ This project is a complete solution for the [GitHub User Activity](https://roadm
 
 ## How It Looks
 
-```bash
 $ github-activity Huseynakhm
 Fetching recent data for Huseynakhm... 
 
