@@ -1,93 +1,148 @@
-# Github-Activity
+# GitHub Activity CLI
 
-A lightweight, zero-dependency command-line interface (CLI) tool built in Python that fetches and displays the recent public activity of any GitHub user directly in your terminal. 
+A lightweight, zero-dependency command-line tool built with Python that fetches and displays the recent public activity of any GitHub user directly in your terminal.
 
-This project is a complete solution for the [GitHub User Activity](https://roadmap.sh/projects/github-user-activity) challenge on roadmap.sh.
+This project is a complete solution for the **GitHub User Activity** challenge on roadmap.sh.
 
 ## Features
 
-* **Zero Third-Party Dependencies:** Built entirely using Python's standard libraries (`urllib`, `json`, `sys`). No `pip install` required!
-* **Smart Push Aggregation:** Automatically loops through the event stream, groups multiple consecutive `PushEvent` items targeting the same repository, and calculates total commit sums for a cleaner layout.
-* **Comprehensive Event Support:** Dynamically tracks and beautifully prints Commits, Stars (`WatchEvent`), Issues, Pull Requests, Repository/Branch/Tag Creation, and provides a clean fallback for any other historical event types.
-* **Defensive Error Handling:** Includes custom `try/except` safety blocks protecting against missing terminal arguments, profile 404 errors, API rate-limiting, and local network/Wi-Fi connection drops.
+* **Zero Third-Party Dependencies** – Built entirely using Python's standard library (`urllib`, `json`, and `sys`). No `pip install` required.
+* **Smart Push Aggregation** – Consecutive `PushEvent` entries targeting the same repository are automatically grouped together, providing a cleaner and more readable output.
+* **Comprehensive Event Support** – Supports commits, stars (`WatchEvent`), issues, pull requests, repository creation, branch/tag creation, and includes fallback handling for additional event types.
+* **Defensive Error Handling** – Gracefully handles missing arguments, invalid usernames, GitHub API errors, rate limiting, and network connectivity issues.
 
-## How It Looks
+## Example Output
 
+```bash
 $ github-activity Huseynakhm
-Fetching recent data for Huseynakhm... 
 
-- Created a brand new repository: Huseynakhm/Github-Activity
+Fetching recent activity for Huseynakhm...
+
+- Created a new repository: Huseynakhm/Github-Activity
 - Starred django/django
 - Opened a pull request in Huseynakhm/TaskTracerCLI
 - Pushed 5 commit(s) to Huseynakhm/TaskTracerCLI
+```
 
+## Installation
 
-## Installation & Global Setup
+### macOS
 
-Follow these setup steps to configure the script so it can be run as a global shortcut (github-activity <username>) from any directory or project folder on your computer.
-
-## For macOS Users
-
-1. Open your terminal and create a dedicated folder for your custom CLI scripts (e.g., ~/bin):
+#### 1. Create a directory for custom scripts
 
 ```bash
 mkdir -p ~/bin
 mv github-activity.py ~/bin/github-activity.py
+```
 
-2. Open your shell configuration file using a terminal text editor (assuming you use the default Zsh):
+#### 2. Create a shell alias
+
+Open your Zsh configuration file:
 
 ```bash
 nano ~/.zshrc
+```
 
-3. Add the following line at the very bottom of the file:
+Add the following line at the bottom:
 
 ```bash
 alias github-activity="python3 ~/bin/github-activity.py"
+```
 
-4.Save and exit (Press Ctrl+O, Enter, then Ctrl+X).
-5.Reload your terminal settings to apply the shortcut immediately:
+#### 3. Reload your shell configuration
 
 ```bash
 source ~/.zshrc
+```
 
-
-## For Windows Users
-
-**Step 1: Set up the Script Directory**
-1. Create a folder somewhere safe on your system to house your custom scripts, for example: C:\bin
-2. Move your github-activity.py file into that folder.
-
-**Step 2: Create a Batch Wrapper File**
-To call this script directly without typing python or .py explicitly, create a companion batch file inside the same folder:
-
-1. Inside C:\bin, create a new text file named github-activity.bat.
-2. Open it in Notepad and paste the following line:
-
-```bash
-@python "C:\bin\github-activity.py" %*
-
-3. Save and close the file. (The %* guarantees that any username arguments you pass in your terminal are fed down cleanly to Python).
-
-**Step 3: Add to Environment Variables PATH**
-1. Click the Windows Start menu, type "Environment Variables", and press Enter.
-2. Under the System Properties window, click the Environment Variables... button at the bottom.
-3. In the "User variables" box (the top box), find the row named Path and double-click it.
-4. Click New on the right side and type: C:\bin
-5. Click OK on all open windows to apply the updates.
-6. Restart your terminal window (Command Prompt or PowerShell) for the system path configuration changes to take effect.
-
-
-## Usage
-Now you can check anyone's public timeline from any location across your command-line environment!
+You can now run:
 
 ```bash
 github-activity <github_username>
+```
 
-**Error Handling Examples**
-If you run into missing data or network issues, the application handles them safely without breaking:
+---
 
-1. No Name Typed: User's name hasn't been typed, the right usage: github-activity <github_username>
+### Windows
 
-2. Missing Profiles: Error: The username 'invalid_user' doesn't exist on GitHub.
+#### 1. Create a script directory
 
-3. No Connectivity: Error: Could not reach GitHub. Please check your internet connection.
+Create a folder to store your custom scripts, for example:
+
+```text
+C:\bin
+```
+
+Move `github-activity.py` into this folder.
+
+#### 2. Create a batch wrapper
+
+Inside `C:\bin`, create a file named:
+
+```text
+github-activity.bat
+```
+
+Add the following content:
+
+```bat
+@python "C:\bin\github-activity.py" %*
+```
+
+#### 3. Add the directory to PATH
+
+1. Open **Environment Variables**.
+2. Under **User Variables**, locate and edit **Path**.
+3. Click **New** and add:
+
+```text
+C:\bin
+```
+
+4. Save the changes and restart your terminal.
+
+You can now run:
+
+```bash
+github-activity <github_username>
+```
+
+## Usage
+
+```bash
+github-activity <github_username>
+```
+
+### Example
+
+```bash
+github-activity torvalds
+```
+
+## Error Handling
+
+The application handles common errors gracefully:
+
+### Missing Username
+
+```text
+Usage: github-activity <github_username>
+```
+
+### Invalid Username
+
+```text
+Error: The username 'invalid_user' does not exist on GitHub.
+```
+
+### No Internet Connection
+
+```text
+Error: Could not reach GitHub. Please check your internet connection.
+```
+
+## Challenge
+
+This project was built as a solution to the GitHub User Activity challenge on roadmap.sh:
+
+https://roadmap.sh/projects/github-user-activity
