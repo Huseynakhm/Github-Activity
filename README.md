@@ -143,9 +143,8 @@ Error: Could not reach GitHub. Please check your internet connection.
 
 ### Contributing
 
-```text
 Contributions are welcome! Please feel free to submit a pull request or open an issue if you have suggestions for improvements.
-```
+
 
 ## Challenge
 
